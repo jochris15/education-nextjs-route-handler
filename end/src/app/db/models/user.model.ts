@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { getDb } from "../config/mongodb";
 import { TUser } from "@/validation/user";
+import { hashPassword } from "../helpers/bcrypt";
 
 export class User {
     static async findAll() {
@@ -8,7 +9,9 @@ export class User {
         return await db.collection("users").aggregate([
             {
                 $project: {
-                    password: 0
+                    password: 0,
+                    createdAt: 0,
+                    updatedAt: 0
                 }
             }
         ]).toArray()
@@ -22,14 +25,21 @@ export class User {
             { _id },
             {
                 projection: {
-                    password: 0
+                    password: 0,
+                    createdAt: 0,
+                    updatedAt: 0
                 }
             })
     }
 
     static async create(data: TUser) {
         const db = await getDb();
-        const { insertedId } = await db.collection("users").insertOne(data)
+        data.password = hashPassword(data.password)
+        const { insertedId } = await db.collection("users").insertOne({
+            ...data,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        })
 
         return await User.findById(insertedId.toString())
     }

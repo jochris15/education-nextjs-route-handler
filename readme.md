@@ -95,3 +95,46 @@ Logic untuk membuat data baru :
 <br>
 
 Untuk validasi, kita menggunakan [**zod**](https://www.npmjs.com/package/zod) yaitu sebuah package untuk membantu melakukan validasi di ts. Buatlah sebuah folder **/src/validation/user.ts**
+```ts
+import { z } from "zod";
+
+export const schemaUser = z.object({
+    name: z.string({
+        message: "Username Required"
+    }),
+    email: z.string({
+        message: "Email Required"
+    }).email({
+        message: "Invalid email format"
+    }),
+    password: z.string({
+        message: "Password Required"
+    }).min(5, {
+        message: "Password min 5 characters"
+    }).max(255, {
+        message: "Password max 255 characters"
+    })
+});
+
+export type TUser = z.infer<typeof schemaUser>; 
+```
+
+Pastikan password juga sudah ke hash menggunakan **bcryptjs**
+
+```ts
+import { getDb } from "../config/mongodb";
+
+export class User {
+    static async create(data: TUser) {
+        const db = await getDb();
+        data.password = hashPassword(data.password)
+        const { insertedId } = await db.collection("users").insertOne({
+            ...data,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        })
+
+        return await User.findById(insertedId.toString())
+    }
+}
+```
