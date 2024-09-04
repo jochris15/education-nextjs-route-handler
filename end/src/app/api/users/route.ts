@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { User } from "@/app/db/models/user.model";
+import { User } from "@/db/models/user.model";
 import { schemaUser } from "@/validation/user";
 import { z } from "zod";
 import { MongoServerError } from "mongodb";
