@@ -19,5 +19,5 @@ const getMongoClient = async () => {
 
 export const getDb = async () => {
     const mongoClient = await getMongoClient()
-    return mongoClient.db('sample_mflix')
+    return mongoClient.db('lecture-p3')
 }
